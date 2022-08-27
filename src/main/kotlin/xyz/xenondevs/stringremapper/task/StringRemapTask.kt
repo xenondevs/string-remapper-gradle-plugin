@@ -56,16 +56,15 @@ abstract class StringRemapTask : DefaultTask() {
         if (whitelistedClasses != null)
             whitelistedClasses = classes.get().map { it.replace('.', File.separatorChar) }
         // TODO copy classes
-        inputClasses.get().filter {it.exists() && it.isDirectory }.forEach { dir ->
+        inputClasses.get().filter { it.exists() && it.isDirectory }.forEach { dir ->
             dir.walkTopDown()
                 .filter {
-                    println(it.absolutePath)
-                    println(it.toRelativeString(dir).substringBefore('.').substringBefore('$'))
                     if (!it.isFile || it.extension != "class")
                         return@filter false
                     return@filter whitelistedClasses?.contains(it.toRelativeString(dir).substringBefore('.').substringBefore('$'))
                         ?: true
                 }.forEach { file ->
+                    println("Remapping Strings: ${file.path}")
                     FileRemapper(file).remap(remapGoal.get())
                 }
         }
