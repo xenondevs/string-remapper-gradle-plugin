@@ -33,6 +33,10 @@ gradlePlugin {
 
 publishing {
     repositories {
-        mavenLocal()
+        maven {
+            name = "xenondevs"
+            url = uri("https://repo.xenondevs.xyz/releases/")
+            credentials(PasswordCredentials::class)
+        }
     }
 }
