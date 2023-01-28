@@ -256,12 +256,16 @@ object Mappings {
             val useSlashes = matchResult.groups[2] != null
             val lookup = matchResult.groups[3]!!.value
             
-            var resolvedLookup = when (lookupType) {
-                "C" -> resolveClassLookup(lookup, goal)
-                "M" -> resolveMethodLookup(lookup, goal)
-                "F" -> resolveFieldLookup(lookup, goal)
-                else -> throw UnsupportedOperationException()
-            } ?: throw IllegalArgumentException("Could not resolve lookup: $lookup")
+            var resolvedLookup = runCatching {
+                when (lookupType) {
+                    "C" -> resolveClassLookup(lookup, goal)
+                    "M" -> resolveMethodLookup(lookup, goal)
+                    "F" -> resolveFieldLookup(lookup, goal)
+                    else -> throw UnsupportedOperationException()
+                }
+            }.onFailure {
+                throw IllegalArgumentException("Could not resolve lookup: $lookup", it)
+            }.getOrNull() ?: throw IllegalArgumentException("Could not resolve lookup: $lookup")
             
             if (useSlashes)
                 resolvedLookup = resolvedLookup.replace('.', '/')
